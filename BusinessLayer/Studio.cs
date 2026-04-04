@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -11,22 +11,22 @@ namespace BusinessLayer
 	{
 		[Key]
 
-		public int Studio_id { get; private set; }
+		public int Studio_id { get; set; }
 
 		[Required]
 		[MaxLength(50)]
 
-		public string Name { get; private set; }
+		public string Name { get; set; }
 
 		[Required]
 		[MaxLength(40)]
-		public string Country { get; private set; }
+		public string Country { get; set; }
 
 		[Required]
-		public string Founded_date { get; private set; }
+		public string Founded_date { get; set; }
 
 		[Required]
-		public string Website { get; private set; }
+		public string Website { get; set; }
 
 		public List<Game> Games { get;  set; }
 

@@ -1,9 +1,9 @@
-// КОРЕКЦИИ:
-// 1. Безкрайна рекурсия: new PublisherService().Create(item) -> PublishersContext (DataLayer)
-// 2. 'internal' -> 'public'
-
 using BusinessLayer;
 using DataLayer;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace ServiceLayer
 {
@@ -13,65 +13,62 @@ namespace ServiceLayer
         {
             try
             {
-                PublishersContext publisherContext = new PublishersContext(new GameManagerDbContext());
-                publisherContext.Create(item);
+                using var context = new GameManagerDbContext();
+                context.Publishers.Add(item);
+                context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public Publisher Read(int key, bool useNavigationalProperties = false)
         {
             try
             {
-                PublishersContext publisherContext = new PublishersContext(new GameManagerDbContext());
-                return publisherContext.Read(key, useNavigationalProperties);
+                using var context = new GameManagerDbContext();
+                IQueryable<Publisher> query = context.Publishers;
+                // Publisher is the principal without nav props in the original model, 
+                // but if there are nav properties, include them here. 
+                // (e.g. if Publisher has Games later, query.Include(p => p.Games))
+                return query.FirstOrDefault(p => p.Publisher_id == key) ?? throw new Exception("Publisher not found");
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public IEnumerable<Publisher> ReadAll(bool useNavigationalProperties = false)
         {
             try
             {
-                PublishersContext publisherContext = new PublishersContext(new GameManagerDbContext());
-                return publisherContext.ReadAll(useNavigationalProperties);
+                using var context = new GameManagerDbContext();
+                IQueryable<Publisher> query = context.Publishers;
+                return query.ToList();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public void Update(Publisher item)
         {
             try
             {
-                PublishersContext publisherContext = new PublishersContext(new GameManagerDbContext());
-                publisherContext.Update(item);
+                using var context = new GameManagerDbContext();
+                context.Publishers.Update(item);
+                context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public void Delete(int key)
         {
             try
             {
-                PublishersContext publisherContext = new PublishersContext(new GameManagerDbContext());
-                publisherContext.Delete(key);
+                using var context = new GameManagerDbContext();
+                var item = context.Publishers.Find(key);
+                if (item != null)
+                {
+                    context.Publishers.Remove(item);
+                    context.SaveChanges();
+                }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +19,21 @@ namespace DataLayer
 
         }
 
+        public static bool IsTestMode { get; set; } = false;
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL("Server=127.0.0.1;Database=GameManager;Uid=root;Pwd=123456789;");
+            if (!optionsBuilder.IsConfigured)
+            {
+                if (IsTestMode)
+                {
+                    optionsBuilder.UseInMemoryDatabase("GameManagerTestDb");
+                }
+                else
+                {
+                    optionsBuilder.UseMySQL("Server=127.0.0.1;Database=GameManager;Uid=root;Pwd=123456789;");
+                }
+            }
             base.OnConfiguring(optionsBuilder);
         }
 

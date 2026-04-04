@@ -1,10 +1,9 @@
-// КОРЕКЦИИ:
-// 1. Безкрайна рекурсия: new StudioService().Create(item) извикваше само себе си
-//    -> Заменено с StudiosContext (DataLayer) който реално пише в базата
-// 2. 'internal' -> 'public' (иначе PresentationLayer не може да го ползва)
-
 using BusinessLayer;
 using DataLayer;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace ServiceLayer
 {
@@ -14,65 +13,67 @@ namespace ServiceLayer
         {
             try
             {
-                StudiosContext studioContext = new StudiosContext(new GameManagerDbContext());
-                studioContext.Create(item);
+                using var context = new GameManagerDbContext();
+                context.Studios.Add(item);
+                context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public Studio Read(int key, bool useNavigationalProperties = false)
         {
             try
             {
-                StudiosContext studioContext = new StudiosContext(new GameManagerDbContext());
-                return studioContext.Read(key, useNavigationalProperties);
+                using var context = new GameManagerDbContext();
+                IQueryable<Studio> query = context.Studios;
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(s => s.Games);
+                }
+                return query.FirstOrDefault(s => s.Studio_id == key) ?? throw new Exception("Studio not found");
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public IEnumerable<Studio> ReadAll(bool useNavigationalProperties = false)
         {
             try
             {
-                StudiosContext studioContext = new StudiosContext(new GameManagerDbContext());
-                return studioContext.ReadAll(useNavigationalProperties);
+                using var context = new GameManagerDbContext();
+                IQueryable<Studio> query = context.Studios;
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(s => s.Games);
+                }
+                return query.ToList();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public void Update(Studio item)
         {
             try
             {
-                StudiosContext studioContext = new StudiosContext(new GameManagerDbContext());
-                studioContext.Update(item);
+                using var context = new GameManagerDbContext();
+                context.Studios.Update(item);
+                context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public void Delete(int key)
         {
             try
             {
-                StudiosContext studioContext = new StudiosContext(new GameManagerDbContext());
-                studioContext.Delete(key);
+                using var context = new GameManagerDbContext();
+                var item = context.Studios.Find(key);
+                if (item != null)
+                {
+                    context.Studios.Remove(item);
+                    context.SaveChanges();
+                }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
     }
 }

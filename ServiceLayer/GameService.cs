@@ -1,10 +1,9 @@
-// GameService.cs беше относително добре написан (единственият от 5-те).
-// Единствената корекция: методите Read/ReadAll/Update бяха static —
-// това е непоследователно и затруднява използването от MainForm.
-// Направени са instance методи (без static).
-
 using BusinessLayer;
 using DataLayer;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System;
 
 namespace ServiceLayer
 {
@@ -14,65 +13,71 @@ namespace ServiceLayer
         {
             try
             {
-                GamesContext gamesContext = new GamesContext(new GameManagerDbContext());
-                gamesContext.Create(item);
+                using var context = new GameManagerDbContext();
+                context.Games.Add(item);
+                context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public Game Read(int key, bool useNavigationalProperties = false)
         {
             try
             {
-                GamesContext gamesContext = new GamesContext(new GameManagerDbContext());
-                return gamesContext.Read(key, useNavigationalProperties);
+                using var context = new GameManagerDbContext();
+                IQueryable<Game> query = context.Games;
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(g => g.Studio)
+                                 .Include(g => g.Genres)
+                                 .Include(g => g.Platforms);
+                }
+                return query.FirstOrDefault(g => g.Id == key) ?? throw new Exception("Game not found");
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public IEnumerable<Game> ReadAll(bool useNavigationalProperties = false)
         {
             try
             {
-                GamesContext gamesContext = new GamesContext(new GameManagerDbContext());
-                return gamesContext.ReadAll(useNavigationalProperties);
+                using var context = new GameManagerDbContext();
+                IQueryable<Game> query = context.Games;
+                if (useNavigationalProperties)
+                {
+                    query = query.Include(g => g.Studio)
+                                 .Include(g => g.Genres)
+                                 .Include(g => g.Platforms);
+                }
+                return query.ToList();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public void Update(Game item)
         {
             try
             {
-                GamesContext gamesContext = new GamesContext(new GameManagerDbContext());
-                gamesContext.Update(item);
+                using var context = new GameManagerDbContext();
+                context.Games.Update(item);
+                context.SaveChanges();
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
 
         public void Delete(int key)
         {
             try
             {
-                GamesContext gamesContext = new GamesContext(new GameManagerDbContext());
-                gamesContext.Delete(key);
+                using var context = new GameManagerDbContext();
+                var item = context.Games.Find(key);
+                if (item != null)
+                {
+                    context.Games.Remove(item);
+                    context.SaveChanges();
+                }
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            catch (Exception ex) { throw; }
         }
     }
 }

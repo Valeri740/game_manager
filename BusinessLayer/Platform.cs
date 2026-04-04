@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -11,22 +11,22 @@ namespace BusinessLayer
 	{
 		[Key]
 
-		public int Id { get; private set; }
+		public int Id { get; set; }
 		
 		[Required]
 		[MaxLength(50)]
 		
-		public string Name { get; private set; }
+		public string Name { get; set; }
 		
 		[Required]
 		[MaxLength(40)]
-		public string Manufacturer { get; private set; }
+		public string Manufacturer { get; set; }
 		
 		[Required]
-		public string Release_date { get; private set; }
+		public string Release_date { get; set; }
 		
 		[Required]
-		public string Generation { get; private set; }
+		public string Generation { get; set; }
 		
 		
 		
